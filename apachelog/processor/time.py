@@ -30,13 +30,18 @@ class LogTimeProcessor (_Processor):
     """
     def __init__(self, previous_log_time_processor=None):
         self.previous_log_time_processor = previous_log_time_processor
-        self.last_time = self.start_time = self.stop_time = None
+        self.last_data = self.last_time = None
+        self.start_time = self.stop_time = None
 
     def process(self, data):
         if self.previous_log_time_processor is None:
-            time = _parse_time(data['%t'])
+            if data['%t'] == self.last_data:
+                time = self.last_time  # don't re-parse a repeated value
+            else:
+                time = _parse_time(data['%t'])
         else:  # avoid re-parsing the time data
             time = self.previous_log_time_processor.last_time
+        self.last_data = data['%t']
         self.last_time = time  # for use by subclasses or other processors
         if self.start_time is None or time < self.start_time:
             self.start_time = time
