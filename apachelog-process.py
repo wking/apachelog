@@ -21,6 +21,7 @@ from apachelog.processor.bandwidth import (
     IPBandwidthProcessor as _IPBandwidthProcessor)
 from apachelog.processor.set import SetProcessor as _SetProcessor
 from apachelog.processor.status import StatusProcessor as _StatusProcessor
+from apachelog.processor.time import LogTimeProcessor as _LogTimeProcessor
 from apachelog.resolve import Resolver as _Resolver
 
 
@@ -127,6 +128,7 @@ if __name__ == '__main__':
         resolver = None
 
     processors = []
+    log_time_processor = None
     for processor in sorted(PROCESSORS.keys()):
         pattr = processor.replace('-', '_')
         if not getattr(args, pattr):
@@ -134,7 +136,12 @@ if __name__ == '__main__':
         kwargs = {}
         if pattr == 'set':
             kwargs['keys'] = args.key
+        if (log_time_processor is not None and
+            issubclass(PROCESSORS[processor], _LogTimeProcessor)):
+            kwargs['previous_log_time_processor'] = log_time_processor
         p = PROCESSORS[processor](**kwargs)
+        if log_time_processor is None and isinstance(p, _LogTimeProcessor):
+            log_time_processor = p
         processors.append(p)
 
     for filename in args.file:

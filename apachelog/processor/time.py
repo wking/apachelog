@@ -28,11 +28,15 @@ class LogTimeProcessor (_Processor):
     >>> ltp.total_seconds()
     15.0
     """
-    def __init__(self):
+    def __init__(self, previous_log_time_processor=None):
+        self.previous_log_time_processor = previous_log_time_processor
         self.last_time = self.start_time = self.stop_time = None
 
     def process(self, data):
-        time = _parse_time(data['%t'])
+        if self.previous_log_time_processor is None:
+            time = _parse_time(data['%t'])
+        else:  # avoid re-parsing the time data
+            time = self.previous_log_time_processor.last_time
         self.last_time = time  # for use by subclasses or other processors
         if self.start_time is None or time < self.start_time:
             self.start_time = time
