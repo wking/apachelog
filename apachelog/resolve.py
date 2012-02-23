@@ -1,3 +1,5 @@
+import os.path as _os_path
+import pickle as _pickle
 import re as _re
 import socket as _socket
 
@@ -46,8 +48,31 @@ class Resolver (object):
         ]:
         REGEXPS[bot] = [_re.compile('.*{}.*'.format(bot))]
 
+    _cache_file = _os_path.expanduser(
+        _os_path.join('~', '.apachelog-resolver.cache'))
+    _cache_loaded = False
+
     def __init__(self, smart=False):
         self._smart = smart
+        self.load_cache()
+
+    @classmethod
+    def load_cache(self):
+        if not self._cache_loaded:
+            self._cache_loaded = True
+            try:
+                with open(self._cache_file, 'rb') as f:
+                    self.IP = _pickle.load(f)
+            except IOError:
+                pass
+            if self.IP is None:
+                self.IP = {}
+
+    @classmethod
+    def save_cache(self):
+        self.load_cache()  # avoid clobbering unloaded content
+        with open(self._cache_file, 'wb') as f:
+            _pickle.dump(self.IP, f)
 
     def resolve(self, ip):
         if ip not in self.IP:
