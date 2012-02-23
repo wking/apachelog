@@ -41,10 +41,10 @@ class Resolver (object):
         'feedburner': [_re.compile('.*rate-limited-proxy-.*.google.com.*')],
         }
     for bot in [
-        'googlebot',
-        'yandex',
         'baiduspider',
-        'msnbot',
+        'googlebot',
+        'msnbot',  # a.k.a: bingbot
+        'yandex',
         ]:
         REGEXPS[bot] = [_re.compile('.*{}.*'.format(bot))]
 
