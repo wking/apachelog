@@ -51,6 +51,7 @@ class Resolver (object):
     _cache_file = _os_path.expanduser(
         _os_path.join('~', '.apachelog-resolver.cache'))
     _cache_loaded = False
+    _cache_dirty = None
 
     def __init__(self, smart=False):
         self._smart = smart
@@ -63,6 +64,7 @@ class Resolver (object):
             try:
                 with open(self._cache_file, 'rb') as f:
                     self.IP = _pickle.load(f)
+                self._cache_dirty = False
             except IOError:
                 pass
             if self.IP is None:
@@ -71,11 +73,13 @@ class Resolver (object):
     @classmethod
     def save_cache(self):
         self.load_cache()  # avoid clobbering unloaded content
-        with open(self._cache_file, 'wb') as f:
-            _pickle.dump(self.IP, f)
+        if self._cache_dirty:
+            with open(self._cache_file, 'wb') as f:
+                _pickle.dump(self.IP, f)
 
     def resolve(self, ip):
         if ip not in self.IP:
+            self._cache_dirty = True
             try:
                 self.IP[ip] = _socket.gethostbyaddr(ip)
             except _socket.herror as e:
