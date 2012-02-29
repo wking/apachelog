@@ -79,7 +79,7 @@ class Resolver (object):
 
     def resolve(self, ip):
         if ip not in self.IP:
-            self._cache_dirty = True
+            Resolver._cache_dirty = True
             try:
                 self.IP[ip] = _socket.gethostbyaddr(ip)
             except _socket.herror as e:
