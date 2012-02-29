@@ -39,6 +39,7 @@ class Resolver (object):
 
     REGEXPS = {
         'feedburner': [_re.compile('.*rate-limited-proxy-.*.google.com.*')],
+        'yahoo': [_re.compile('.*crawl.yahoo.*')],  # slurp
         }
     for bot in [
         'baiduspider',
